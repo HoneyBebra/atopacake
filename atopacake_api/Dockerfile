@@ -23,5 +23,4 @@ RUN  groupadd -r ${APP_GROUP} && \
 
 USER ${APP_USER}
 
-# Timely
-# ENTRYPOINT ["gunicorn", "src.main:app", "--bind", "0.0.0.0:8000", "--worker-class", "uvicorn.workers.UvicornWorker"]
+ENTRYPOINT ["gunicorn", "src.main:app", "--bind", "0.0.0.0:8000", "--worker-class", "uvicorn.workers.UvicornWorker"]

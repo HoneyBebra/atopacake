@@ -1,11 +1,14 @@
 from uuid import UUID, uuid4
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.auth.models.users import Users
-from src.cards.models.cards import Cards
-from src.common.models import BaseModel
+from src.core.models import BaseModel
+
+if TYPE_CHECKING:
+    from src.auth.models.users import Users
+    from src.cards.models.cards import Cards
 
 
 class Directories(BaseModel):

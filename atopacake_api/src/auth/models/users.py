@@ -1,11 +1,14 @@
 from uuid import UUID, uuid4
+from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.auth.models.tg_users import TgUsers
 from src.cards.models.directories import Directories
-from src.common.models import BaseModel
+from src.core.models import BaseModel
 from src.texts.models.texts import Texts
+
+if TYPE_CHECKING:
+    from src.auth.models.tg_users import TgUsers
 
 
 class Users(BaseModel):
@@ -34,7 +37,3 @@ class Users(BaseModel):
         "Texts",
         back_populates="user",
     )
-
-    # TODO:
-    # def check_password(self, password: str) -> bool:
-    #     return check_password_hash(self.password, password)

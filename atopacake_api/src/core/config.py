@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     postgres_host: str
     postgres_port: int
 
+    api_prefix: str
+
+    app_name: str
+    app_description: str
+    app_version: str
+
     @property
     def postgres_dsn(self) -> str:
         return (

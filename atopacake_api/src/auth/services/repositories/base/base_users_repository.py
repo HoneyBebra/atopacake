@@ -3,9 +3,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from src.auth.schemas.v1.users import UserSchema
-
-# TODO: hash sensitive data!!
+from src.auth.models.users import Users
 
 
 class BaseUsersRepository(ABC):
@@ -17,14 +15,14 @@ class BaseUsersRepository(ABC):
             login: str,
             password: str,
             phone_number: str | None = None,
-    ) -> UserSchema:
+    ) -> Users:
         raise NotImplementedError
 
     @abstractmethod
     async def read(
             self,
             user_id: UUID,
-    ) -> UserSchema:
+    ) -> Users:
         raise NotImplementedError
 
     @abstractmethod
@@ -34,7 +32,7 @@ class BaseUsersRepository(ABC):
             login: str | None = None,
             password: str | None = None,
             phone_number: str | None = None,
-    ) -> UserSchema:
+    ) -> Users:
         raise NotImplementedError
 
     @abstractmethod
