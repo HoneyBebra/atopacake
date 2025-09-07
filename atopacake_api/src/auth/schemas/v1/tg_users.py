@@ -3,11 +3,11 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-class CreateTgUserSchema(BaseModel):
+class TgUserSchema(BaseModel):
     user_id: UUID | None = Field(default=None)
     tg_id: UUID
     username: str
 
 
-class CreatingTgUserResponseSchema(BaseModel):
+class TgUserResponseSchema(BaseModel):
     tg_id: UUID
