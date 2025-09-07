@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
 from src.auth.router.v1 import router as auth_router

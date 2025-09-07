@@ -2,3 +2,7 @@ ruff==0.4.10
 pre-commit==3.7.1
 mypy==1.10.0
 greenlet==3.2.4
+alembic==1.16.4
+python-dotenv==1.0.1
+pydantic-settings==2.10.1
+asyncpg==0.30.0

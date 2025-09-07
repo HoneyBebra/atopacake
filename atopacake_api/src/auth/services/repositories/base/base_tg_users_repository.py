@@ -2,8 +2,8 @@
 
 from abc import ABC, abstractmethod
 
-from src.auth.schemas.v1.tg_users import CreateTgUserSchema
 from src.auth.models.users import Users
+from src.auth.schemas.v1.tg_users import CreateTgUserSchema
 
 
 class BaseTgUsersRepository(ABC):

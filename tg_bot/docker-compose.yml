@@ -1,7 +1,7 @@
 services:
-  tg-bot:
-    image: tg-bot
-    container_name: tg-bot
+  tg_bot:
+    image: tg_bot
+    container_name: tg_bot
     restart: always
     env_file:
       - .env
