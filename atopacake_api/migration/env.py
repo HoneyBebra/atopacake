@@ -10,6 +10,12 @@ from alembic import context
 from src.core.config import settings  # NEW
 from src.core.models import BaseModel  # NEW
 
+from src.auth.models.users import Users  # NEW
+from src.auth.models.tg_users import TgUsers  # NEW
+from src.cards.models.cards import Cards  # NEW
+from src.cards.models.directories import Directories  # NEW
+from src.texts.models.texts import Texts  # NEW
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
