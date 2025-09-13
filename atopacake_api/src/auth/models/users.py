@@ -3,8 +3,8 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.cards.models.directories import Directories
 from src.core.models import BaseModel
+from src.directories.models.directories import Directories
 from src.texts.models.texts import Texts
 
 if TYPE_CHECKING:
@@ -23,6 +23,7 @@ class Users(BaseModel):
     login: Mapped[str] = mapped_column(nullable=True)
     password: Mapped[str] = mapped_column(nullable=True)
     phone_number: Mapped[str] = mapped_column(nullable=True)
+    email: Mapped[str] = mapped_column(nullable=True)
 
     tg_user: Mapped["TgUsers"] = relationship(
         "TgUsers",

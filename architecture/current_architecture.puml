@@ -5,21 +5,24 @@ component NginxGateway
 component TgBot
 
 package AtopacakeApi {
-  component NginxAtopacake
-  database PostgresAtopacake
+  component NginxAtopacakeApi
+  database PostgresAtopacakeApi
+  database RedisAtopacakeApi
 
   package FastApiApp {
     component Cards
     component Texts
     component Auth
+    component Directories
   }
 }
 
 
 User -> NginxGateway
-NginxGateway -> NginxAtopacake
-NginxAtopacake -down-> FastApiApp
+NginxGateway -> NginxAtopacakeApi
+NginxAtopacakeApi -down-> FastApiApp
 TgUser -> TgBot
 TgBot -down-> NginxGateway
-FastApiApp -down-> PostgresAtopacake
+FastApiApp -down-> PostgresAtopacakeApi
+Auth -down-> RedisAtopacakeApi
 @enduml

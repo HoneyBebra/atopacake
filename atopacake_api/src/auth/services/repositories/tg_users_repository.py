@@ -2,7 +2,7 @@
 
 from src.auth.models.users import Users
 from src.auth.schemas.v1.tg_users import TgUserSchema
-from src.auth.services.repositories.base.base_tg_users_repository import BaseTgUsersRepository
+from src.auth.services.repositories.base.tg_users_repository import BaseTgUsersRepository
 from src.db.postgres import get_session
 
 

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserSchema(BaseModel):
@@ -8,3 +8,4 @@ class UserSchema(BaseModel):
     login: str | None = Field(default=None)
     password: str | None = Field(default=None)
     phone_number: str | None = Field(default=None)
+    email: EmailStr | None = Field(default=None)

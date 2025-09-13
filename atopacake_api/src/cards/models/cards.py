@@ -8,7 +8,7 @@ from src.core.models import BaseModel
 from src.texts.models.texts import Texts
 
 if TYPE_CHECKING:
-    from src.cards.models.directories import Directories
+    from src.directories.models.directories import Directories
 
 
 class Cards(BaseModel):

@@ -1,9 +1,13 @@
 from functools import lru_cache
 from logging import config as logging_config
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from redis.asyncio.retry import Retry
+from redis.backoff import ExponentialBackoff
+from redis.exceptions import ConnectionError, TimeoutError
 
 from src.core.logger import LOGGING
 
@@ -20,7 +24,7 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
     postgres_host: str
-    postgres_port: int
+    postgres_port: str
     postgres_echo: bool
 
     api_prefix: str
@@ -28,6 +32,17 @@ class Settings(BaseSettings):
     app_name: str
     app_description: str
     app_version: str
+
+    jwt_secret_key: str
+    jwt_algorithm: str
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+
+    password_min_length: int = 8
+
+    redis_host: str
+    redis_port: str
+    redis_tokens_db: int
 
     @property
     def postgres_dsn(self) -> str:
@@ -39,6 +54,18 @@ class Settings(BaseSettings):
             f"{self.postgres_port}/"
             f"{self.postgres_db}"
         )
+
+    @property
+    def redis_tokens_settings(self) -> dict[str, Any]:
+        return {
+            "host": self.redis_host,
+            "port": self.redis_port,
+            "db": self.redis_tokens_db,
+            "password": "d40a665a67c14248bdec2c0e0876d45c",
+            "socket_keepalive": True,
+            "retry": Retry(ExponentialBackoff(), 3),
+            "retry_on_error": [TimeoutError, ConnectionError],
+        }
 
 
 @lru_cache

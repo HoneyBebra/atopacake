@@ -13,8 +13,8 @@ from src.core.models import BaseModel  # NEW
 from src.auth.models.users import Users  # NEW
 from src.auth.models.tg_users import TgUsers  # NEW
 from src.cards.models.cards import Cards  # NEW
-from src.cards.models.directories import Directories  # NEW
 from src.texts.models.texts import Texts  # NEW
+from src.directories.models.directories import Directories  # NEW
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

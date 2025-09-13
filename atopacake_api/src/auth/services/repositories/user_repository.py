@@ -3,8 +3,8 @@
 from uuid import UUID
 
 from src.auth.models.users import Users
-from src.auth.services.repositories.base.base_users_repository import BaseUsersRepository
 from src.auth.schemas.v1.users import UserSchema
+from src.auth.services.repositories.base.users_repository import BaseUsersRepository
 
 
 class UsersRepository(BaseUsersRepository):

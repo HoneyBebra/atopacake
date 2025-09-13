@@ -20,6 +20,9 @@ router.include_router(auth_router)
 app.include_router(router)
 
 if __name__ == "__main__":
+
+    # TODO: migrate new PSQL schema
+
     uvicorn.run(
         app,
         host="0.0.0.0",
