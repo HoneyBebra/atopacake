@@ -11,7 +11,6 @@ from src.core.config import settings  # NEW
 from src.core.models import BaseModel  # NEW
 
 from src.auth.models.users import Users  # NEW
-from src.auth.models.tg_users import TgUsers  # NEW
 from src.cards.models.cards import Cards  # NEW
 from src.texts.models.texts import Texts  # NEW
 from src.directories.models.directories import Directories  # NEW
