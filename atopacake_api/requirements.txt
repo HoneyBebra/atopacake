@@ -14,3 +14,5 @@ python-multipart==0.0.9
 redis==5.0.1
 redis[hiredis]==5.0.1
 jose==1.0.0
+fastapi-jwt==0.3.0
+email-validator==2.3.0

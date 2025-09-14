@@ -4,14 +4,14 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from src.auth.models.users import Users
-from src.auth.schemas.v1.users import UserSchema
+from src.auth.schemas.v1.users import UserRegisterSchema
 
 
 class BaseUsersRepository(ABC):
     """Abstract class describing working with database."""
 
     @abstractmethod
-    async def create(self, user_data: UserSchema) -> Users:
+    async def create(self, user_data: UserRegisterSchema) -> Users:
         raise NotImplementedError
 
     @abstractmethod
@@ -19,7 +19,7 @@ class BaseUsersRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update(self, user_data: UserSchema) -> Users:
+    async def update(self, user_data: UserRegisterSchema) -> Users:
         raise NotImplementedError
 
     @abstractmethod
