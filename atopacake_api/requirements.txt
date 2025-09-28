@@ -16,3 +16,4 @@ redis[hiredis]==5.0.1
 jose==1.0.0
 fastapi-jwt==0.3.0
 email-validator==2.3.0
+orjson==3.11.3

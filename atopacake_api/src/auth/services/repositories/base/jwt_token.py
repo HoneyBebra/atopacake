@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class BaseJwtTokenRepository(ABC):
     @abstractmethod
-    async def create_refresh_token(self, token: str, user_id: str, expires_in: int) -> None:
+    async def set_refresh_token(self, token: str, user_id: str, expires_in: int) -> None:
         raise NotImplementedError
 
     @abstractmethod

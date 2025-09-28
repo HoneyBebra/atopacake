@@ -11,15 +11,42 @@ class BaseUsersRepository(ABC):
     """Abstract class describing working with database."""
 
     @abstractmethod
-    async def create(self, user_data: UserRegisterSchema) -> Users:
+    async def create(
+            self,
+            login: str | None = None,
+            password: str | None = None,
+            phone_number: str = None,
+            email: str | None = None,
+            tg_id: int | None = None,
+            tg_username: str | None = None,
+    ) -> Users:
         raise NotImplementedError
 
     @abstractmethod
-    async def read(self, user_id: UUID) -> Users:
+    async def read(
+            self,
+            login: str | None = None,
+            phone_number: str | None = None,
+            email: str | None = None,
+            tg_id: int | None = None,
+            tg_username: str | None = None,
+            limit: int | None = None,
+            offset: int | None = None,
+            order_by: str | None = None,
+    ) -> list[Users]:
         raise NotImplementedError
 
     @abstractmethod
-    async def update(self, user_data: UserRegisterSchema) -> Users:
+    async def update(
+            self,
+            user_id: UUID,
+            login: str | None = None,
+            password: str | None = None,
+            phone_number: str = None,
+            email: str | None = None,
+            tg_id: int | None = None,
+            tg_username: str | None = None,
+    ) -> Users:
         raise NotImplementedError
 
     @abstractmethod
