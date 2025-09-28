@@ -66,11 +66,12 @@ class Settings(BaseSettings):
 
     @property
     def redis_tokens_settings(self) -> dict[str, Any]:
+        # TODO: Add redis password
+
         return {
             "host": self.redis_host,
             "port": self.redis_port,
             "db": self.redis_tokens_db,
-            "password": "d40a665a67c14248bdec2c0e0876d45c",
             "socket_keepalive": True,
             "retry": Retry(ExponentialBackoff(), 3),
             "retry_on_error": [TimeoutError, ConnectionError],

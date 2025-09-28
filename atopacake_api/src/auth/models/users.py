@@ -18,7 +18,7 @@ class Users(BaseModel):
     )
     login: Mapped[str] = mapped_column(nullable=True)
     password: Mapped[str] = mapped_column(nullable=True)
-    phone_number: Mapped[str] = mapped_column(nullable=True)
+    phone_number: Mapped[str] = mapped_column()
     email: Mapped[str] = mapped_column(nullable=True)
     tg_id: Mapped[int] = mapped_column(nullable=True)
     tg_username: Mapped[str] = mapped_column(nullable=True)

@@ -6,6 +6,12 @@ from src.auth.router.v1 import router as auth_router
 from src.core.config import settings
 from src.core.logger import LOGGING
 
+# Models registration
+from src.auth.models.users import Users  # noqa: F401
+from src.cards.models.cards import Cards  # noqa: F401
+from src.texts.models.texts import Texts  # noqa: F401
+from src.directories.models.directories import Directories  # noqa: F401
+
 app = FastAPI(
     title=settings.app_name,
     description=settings.app_description,
@@ -21,7 +27,7 @@ app.include_router(router)
 
 if __name__ == "__main__":
 
-    # TODO: migrate new PSQL schema
+    # TODO: encode the phone_number, email, tg_id, tg_username
 
     uvicorn.run(
         app,
