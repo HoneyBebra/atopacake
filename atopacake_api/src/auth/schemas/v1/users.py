@@ -15,9 +15,9 @@ class UserRegisterSchema(UserRegisterBase):
     confirm_password: Annotated[str, AfterValidator(validate_password)]
     email: EmailStr
 
-    @model_validator(mode="after")
+    @model_validator(mode="before")
     def check_passwords_match(self) -> "UserRegisterSchema":
-        if self.password != self.confirm_password:
+        if self.get("password") != self.get("confirm_password"):
             raise ValueError("passwords do not match")
         return self
 

@@ -57,8 +57,6 @@ async def register_tg_user(
         user_data: UserRegisterTgSchema,
         user_service: UsersService = Depends(),
 ) -> Response:
-    # TODO: Check error
-
     response = Response()
     try:
         return await user_service.register_tg(user_data, response)

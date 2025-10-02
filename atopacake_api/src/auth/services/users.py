@@ -47,7 +47,7 @@ class UsersService:
 
     async def __base_create_user(
             self,
-            user_data: UserRegisterSchema | UserRegisterTgSchema,
+            user_data: UserRegisterSchema | UserRegisterTgSchema,  # TODO: Make it through polymorphism or make it in view
             response: Response,
     ) -> Response:
         user = await self.users_repository.create(**dict(user_data))
@@ -55,9 +55,6 @@ class UsersService:
         access_token = create_token(data={"sub": str(user.id)}, token_type="access")
         refresh_token = create_token(data={"sub": str(user.id)}, token_type="refresh")
 
-        # TODO: Check JWT signature:
-        #  signature verification failed
-        #  a-string-secret-at-least-256-bits-long
         await self.jwt_token_repository.set_refresh_token(
             token=refresh_token,
             user_id=str(user.id),

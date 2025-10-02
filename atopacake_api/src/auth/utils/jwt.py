@@ -1,6 +1,7 @@
 from typing import Any
 
 from jose import JWTError, jwt
+# TODO: jose is deprecated
 
 from src.auth.exceptions.jwt import InvalidTokenType, TokenValidationError
 from src.core.config import settings

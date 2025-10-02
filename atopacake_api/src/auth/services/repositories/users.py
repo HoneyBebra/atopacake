@@ -28,7 +28,8 @@ class UsersRepository(BaseUsersRepository):
         user = Users()
 
         user.login = login
-        user.password = hash_password(password)
+        if password is not None:
+            user.password = hash_password(password)
         user.email = email
         user.tg_id = tg_id
         user.tg_username = tg_username
