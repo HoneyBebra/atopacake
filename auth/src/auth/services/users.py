@@ -3,8 +3,8 @@ from typing import Any
 
 from fastapi import Depends, Response
 
-from src.auth.exceptions.user import UserAlreadyExists
-from src.auth.schemas.v1.users import UserRegisterSchema, UserRegisterTgSchema
+from src.auth.exceptions.users import UserAlreadyExists
+from src.auth.schemas.v1.users import UserRegisterSchema
 from src.auth.services.repositories.jwt_token import JwtTokenRepository
 from src.auth.services.repositories.users import UsersRepository
 from src.auth.utils.jwt import create_token
@@ -33,21 +33,9 @@ class UsersService:
         del user_data.confirm_password
         return await self.__base_create_user(user_data, response)
 
-    async def register_tg(self, user_data: UserRegisterTgSchema, response: Response) -> Response:
-        # TODO: make register all actions rollback when any errors raised
-
-        already_used_field = await self.__get_already_used_field(
-            tg_id=user_data.tg_id,
-            tg_username=user_data.tg_username,
-        )
-        if already_used_field is not None:
-            raise UserAlreadyExists(already_used_field)
-
-        return await self.__base_create_user(user_data, response)
-
     async def __base_create_user(
             self,
-            user_data: UserRegisterSchema | UserRegisterTgSchema,  # TODO: Make it through polymorphism or make it in view
+            user_data: UserRegisterSchema,
             response: Response,
     ) -> Response:
         user = await self.users_repository.create(**dict(user_data))

@@ -3,11 +3,10 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
 # Models registration
-from src.cards.models.cards import Cards  # noqa: F401
+from src.auth.models.users import Users  # noqa: F401
+from src.auth.router.v1 import router as auth_router
 from src.core.config import settings
 from src.core.logger import LOGGING
-from src.directories.models.directories import Directories  # noqa: F401
-from src.texts.models.texts import Texts  # noqa: F401
 
 app = FastAPI(
     title=settings.app_name,
@@ -19,12 +18,13 @@ app = FastAPI(
 )
 
 router = APIRouter(prefix=settings.api_prefix)
-
-# router.include_router(<router_name>)
-
+router.include_router(auth_router)
 app.include_router(router)
 
 if __name__ == "__main__":
+
+    # TODO: encode the phone_number, email, tg_id, tg_username
+
     uvicorn.run(
         app,
         host="0.0.0.0",

@@ -1,15 +1,13 @@
-# Maybe this will be moved to the auth service
-
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 
-from src.auth.utils.encryption import hash_password
-from src.db.postgres import get_session
 from src.auth.models.users import Users
 from src.auth.services.repositories.base.users import BaseUsersRepository
+from src.auth.utils.encryption import hash_password
+from src.db.postgres import get_session
 
 
 class UsersRepository(BaseUsersRepository):
@@ -18,21 +16,16 @@ class UsersRepository(BaseUsersRepository):
 
     async def create(
             self,
-            login: str | None = None,
-            password: str | None = None,
-            phone_number: str = None,
+            login: str,
+            password: str,
+            phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
     ) -> Users:
         user = Users()
 
         user.login = login
-        if password is not None:
-            user.password = hash_password(password)
+        user.password = hash_password(password)
         user.email = email
-        user.tg_id = tg_id
-        user.tg_username = tg_username
         user.phone_number = phone_number
 
         self.session.add(user)
@@ -46,8 +39,6 @@ class UsersRepository(BaseUsersRepository):
             login: str | None = None,
             phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
             limit: int | None = None,
             offset: int | None = None,
             order_by: str | None = None,
@@ -60,11 +51,6 @@ class UsersRepository(BaseUsersRepository):
             query = query.where(Users.phone_number == phone_number)
         if email is not None:
             query = query.where(Users.email == email)
-        if tg_id is not None:
-            query = query.where(Users.tg_id == tg_id)
-        if tg_username is not None:
-            query = query.where(Users.tg_username == tg_username)
-
         if order_by is not None:
             query = query.order_by(order_by)
         if limit is not None:
@@ -80,10 +66,8 @@ class UsersRepository(BaseUsersRepository):
             user_id: UUID,
             login: str | None = None,
             password: str | None = None,
-            phone_number: str = None,
+            phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
     ) -> Users:
         ...
 

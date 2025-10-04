@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from src.auth.exceptions.user import UserAlreadyExists
-from src.auth.schemas.v1.users import UserRegisterSchema, UserRegisterTgSchema
+from src.auth.exceptions.users import UserAlreadyExists
+from src.auth.schemas.v1.users import UserRegisterSchema
 from src.auth.services.users import UsersService
 
 router = APIRouter(prefix="/users")
@@ -30,36 +30,6 @@ async def register_user(
     response = Response()
     try:
         return await user_service.register(user_data, response)
-    except UserAlreadyExists as e:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=e.message,
-        ) from e
-
-
-@router.post(
-    "/register-tg",
-    status_code=status.HTTP_204_NO_CONTENT,
-    description="Register and creating user from Telegram",
-    summary="Register and creating user from Telegram",
-    responses={
-        status.HTTP_204_NO_CONTENT: {
-            "model": None,
-            "description": "User created",
-        },
-        status.HTTP_409_CONFLICT: {
-            "model": None,
-            "description": "User already created",
-        },
-    },
-)
-async def register_tg_user(
-        user_data: UserRegisterTgSchema,
-        user_service: UsersService = Depends(),
-) -> Response:
-    response = Response()
-    try:
-        return await user_service.register_tg(user_data, response)
     except UserAlreadyExists as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

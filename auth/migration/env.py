@@ -9,10 +9,7 @@ from alembic import context
 
 from src.core.config import settings  # NEW
 from src.core.models import BaseModel  # NEW
-
-from src.cards.models.cards import Cards  # NEW
-from src.texts.models.texts import Texts  # NEW
-from src.directories.models.directories import Directories  # NEW
+from src.auth.models.users import Users  # NEW
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -28,7 +25,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = BaseModel.metadata  # NEW
+target_metadata = BaseModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

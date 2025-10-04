@@ -1,14 +1,9 @@
 from functools import lru_cache
 from logging import config as logging_config
 from pathlib import Path
-from typing import Any
 
 from dotenv import load_dotenv
-from fastapi_jwt import JwtAccessCookie, JwtRefreshCookie
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from redis.asyncio.retry import Retry
-from redis.backoff import ExponentialBackoff
-from redis.exceptions import ConnectionError, TimeoutError
 
 from src.core.logger import LOGGING
 
@@ -34,17 +29,6 @@ class Settings(BaseSettings):
     app_description: str
     app_version: str
 
-    jwt_secret_key: str
-    jwt_algorithm: str
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 7
-
-    password_min_length: int = 8
-
-    redis_host: str
-    redis_port: str
-    redis_tokens_db: int
-
     @property
     def postgres_dsn(self) -> str:
         return (
@@ -55,27 +39,6 @@ class Settings(BaseSettings):
             f"{self.postgres_port}/"
             f"{self.postgres_db}"
         )
-
-    @property
-    def access_security(self) -> JwtAccessCookie:
-        return JwtAccessCookie(secret_key=self.jwt_secret_key, auto_error=False)
-
-    @property
-    def refresh_security(self) -> JwtRefreshCookie:
-        return JwtRefreshCookie(secret_key=self.jwt_secret_key, auto_error=False)
-
-    @property
-    def redis_tokens_settings(self) -> dict[str, Any]:
-        # TODO: Add redis password
-
-        return {
-            "host": self.redis_host,
-            "port": self.redis_port,
-            "db": self.redis_tokens_db,
-            "socket_keepalive": True,
-            "retry": Retry(ExponentialBackoff(), 3),
-            "retry_on_error": [TimeoutError, ConnectionError],
-        }
 
 
 @lru_cache

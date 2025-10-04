@@ -1,10 +1,7 @@
-# Maybe this will be moved to the auth service
-
 from abc import ABC, abstractmethod
 from uuid import UUID
 
 from src.auth.models.users import Users
-from src.auth.schemas.v1.users import UserRegisterSchema
 
 
 class BaseUsersRepository(ABC):
@@ -13,12 +10,10 @@ class BaseUsersRepository(ABC):
     @abstractmethod
     async def create(
             self,
-            login: str | None = None,
-            password: str | None = None,
-            phone_number: str = None,
+            login: str,
+            password: str,
+            phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
     ) -> Users:
         raise NotImplementedError
 
@@ -28,8 +23,6 @@ class BaseUsersRepository(ABC):
             login: str | None = None,
             phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
             limit: int | None = None,
             offset: int | None = None,
             order_by: str | None = None,
@@ -42,10 +35,8 @@ class BaseUsersRepository(ABC):
             user_id: UUID,
             login: str | None = None,
             password: str | None = None,
-            phone_number: str = None,
+            phone_number: str | None = None,
             email: str | None = None,
-            tg_id: int | None = None,
-            tg_username: str | None = None,
     ) -> Users:
         raise NotImplementedError
 
