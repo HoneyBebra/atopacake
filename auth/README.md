@@ -11,4 +11,5 @@ docker-compose up -d --build
 ```
 
 ## PostgreSQL schema:
+# TODO: Update schema
 ![PostgreSQL-schema](./architecture/psql_schema.png)
