@@ -4,11 +4,13 @@ from jose import JWTError, jwt
 
 # TODO: jose is deprecated
 from src.auth.exceptions.jwt import InvalidTokenType, TokenValidationError
+from src.auth.schemas.v1.users import UserJwtSchema
 from src.core.config import settings
 
 
-def create_token(data: dict[str, Any], token_type: str) -> str:
-    to_encode = data.copy()
+def create_token(data: UserJwtSchema, token_type: str) -> str:
+    raw_data = dict(data)
+    to_encode = raw_data.copy()
     to_encode.update({"type": token_type})
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt

@@ -23,7 +23,8 @@ app.include_router(router)
 
 if __name__ == "__main__":
 
-    # TODO: encode the phone_number, email, tg_id, tg_username
+    # TODO: Encode the phone_number, email
+    # TODO: Add backoff to DB requests
 
     uvicorn.run(
         app,

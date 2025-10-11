@@ -43,7 +43,8 @@ class Settings(BaseSettings):
 
     redis_host: str
     redis_port: str
-    redis_tokens_db: int
+    redis_refresh_tokens_db: int
+    redis_blacklist_tokens_db: int
 
     @property
     def postgres_dsn(self) -> str:
@@ -65,13 +66,12 @@ class Settings(BaseSettings):
         return JwtRefreshCookie(secret_key=self.jwt_secret_key, auto_error=False)
 
     @property
-    def redis_tokens_settings(self) -> dict[str, Any]:
+    def redis_settings(self) -> dict[str, Any]:
         # TODO: Add redis password
 
         return {
             "host": self.redis_host,
             "port": self.redis_port,
-            "db": self.redis_tokens_db,
             "socket_keepalive": True,
             "retry": Retry(ExponentialBackoff(), 3),
             "retry_on_error": [TimeoutError, ConnectionError],
