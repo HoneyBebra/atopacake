@@ -40,6 +40,6 @@ class JwtTokenRepository(BaseJwtTokenRepository):
                 value=str(user_id),
             )
 
-    async def is_token_blacklisted(self, jti: UUID) -> bool:
+    async def is_token_in_blacklist(self, jti: UUID) -> bool:
         async with self.blacklist_tokens_session as session:
             return bool(await session.exists(str(jti)))

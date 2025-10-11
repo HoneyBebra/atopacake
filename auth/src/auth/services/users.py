@@ -114,7 +114,7 @@ class UsersService:
         if not jwt_credentials:
             raise NoCredentialsData
 
-        if await self.jwt_token_repository.is_token_blacklisted(jti=jwt_credentials.jti):
+        if await self.jwt_token_repository.is_token_in_blacklist(jti=jwt_credentials.jti):
             raise TokenInBlackList
 
         return user_jwt_schema
