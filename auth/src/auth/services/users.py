@@ -4,15 +4,8 @@ from typing import Any
 
 from fastapi import Depends, Response
 from fastapi_jwt import JwtAuthorizationCredentials
-from pydantic import ValidationError
 
-from src.auth.exceptions.users import (
-    InvalidCredentials,
-    NoCredentialsData,
-    TokenInBlackList,
-    TokenIsOutdated,
-    UserAlreadyExists,
-)
+from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
 from src.auth.models.users import Users
 from src.auth.schemas.v1.users import UserJwtSchema, UserLoginSchema, UserRegisterSchema
 from src.auth.services.repositories.jwt_token import JwtTokenRepository
@@ -98,23 +91,3 @@ class UsersService:
             raise InvalidCredentials
 
         return users[0]
-
-    async def verify_jwt(self, jwt_credentials: JwtAuthorizationCredentials) -> UserJwtSchema:
-        # TODO: Maybe move in decorator
-        # TODO: Check if secret key works
-
-        try:
-            user_jwt_schema = UserJwtSchema(**jwt_credentials.subject)
-        except ValidationError as e:
-            raise InvalidCredentials from e
-
-        if user_jwt_schema.iat + user_jwt_schema.exp < time.time():
-            raise TokenIsOutdated
-
-        if not jwt_credentials:
-            raise NoCredentialsData
-
-        if await self.jwt_token_repository.is_token_in_blacklist(jti=jwt_credentials.jti):
-            raise TokenInBlackList
-
-        return user_jwt_schema
