@@ -19,8 +19,3 @@ class NoCredentialsData(Exception):
 class TokenInBlackList(Exception):
     def __init__(self) -> None:
         self.message = "Token in black list"
-
-
-class TokenIsOutdated(Exception):
-    def __init__(self) -> None:
-        self.message = "Token is outdated"

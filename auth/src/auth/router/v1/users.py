@@ -3,15 +3,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials
 
-from src.auth.exceptions.users import (
-    InvalidCredentials,
-    NoCredentialsData,
-    TokenInBlackList,
-    UserAlreadyExists,
-)
+from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
+
 from src.auth.schemas.v1.users import UserJwtSchema, UserLoginSchema, UserRegisterSchema
 from src.auth.services.users import UsersService
 from src.core.config import settings
+from src.auth.utils.handlers_decorators import CheckJWT
 
 router = APIRouter(prefix="/users")
 
@@ -94,58 +91,49 @@ async def login_user(
             "model": UserJwtSchema,
             "description": "User data received"
         },
+        status.HTTP_403_FORBIDDEN: {
+            "model": None,
+            "description": "No rights",
+        }
     },
 )
+@CheckJWT(credentials_type="all")
 async def get_user(
-    user_service: UsersService = Depends(),
     credentials: JwtAuthorizationCredentials = Security(settings.access_security),
 ) -> UserJwtSchema:
-    try:
-        user = await user_service.verify_jwt(credentials)
-        return user
-    except (NoCredentialsData, TokenInBlackList) as e:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=e.message,
-        ) from e
+    return UserJwtSchema(**credentials.subject)
 
 
-"""
-@router.post("/refresh", response_model=TokenResponse)
-async def refresh_token(
-        token_data: TokenRefresh,
-        session: AsyncSession = Depends(get_session)
-):
-    payload = verify_token(token_data.refresh_token, "refresh")
-    user_id = payload.get("sub")
+@router.post(
+    "/refresh",
+    description="Refresh tokens",
+    summary="Get new access token and replace refresh one",
+    responses={
+        status.HTTP_200_OK: {
+            "model": UserJwtSchema,
+            "description": "User data received"
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": None,
+            "description": "No rights",
+        }
+    },
+)
+async def refresh_access_token(
+    user_service: UsersService = Depends(),
+    refresh_credentials: JwtAuthorizationCredentials = Security(refresh_security),
+) -> Response:
+    user = await user_service.verify(refresh_credentials)
 
-    # Проверка refresh токена в БД
-    tokens_repository = RefreshTokensRepository(session)
-    token_record = await tokens_repository.get_by_token(token_data.refresh_token)
-
-    if not token_record or token_record.is_revoked:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token"
-        )
-
-    # Создание нового access токена
-    access_token = create_access_token(data={"sub": user_id})
-
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=token_data.refresh_token,  # Refresh токен остается тот же
-        expires_in=settings.access_token_expire_minutes * 60
-    )
+    return await user_service.refresh_token(user, refresh_credentials.jti)
 
 
-@router.post("/logout")
-async def logout(
-        token_data: TokenRefresh,
-        session: AsyncSession = Depends(get_session)
-):
-    tokens_repository = RefreshTokensRepository(session)
-    await tokens_repository.revoke_token(token_data.refresh_token)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def invalidate_user(
+    user_service: UserService = Depends(),
+    refresh_credentials: JwtAuthorizationCredentials = Security(refresh_security),
+    access_credentials: JwtAuthorizationCredentials = Security(access_security),
+) -> None:
+    user = await user_service.verify(refresh_credentials)
 
-    return {"message": "Successfully logged out"}
-"""
+    await user_service.logout(user.id, refresh_credentials.jti, access_credentials.jti)
