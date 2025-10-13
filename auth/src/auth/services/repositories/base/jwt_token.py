@@ -20,5 +20,5 @@ class BaseJwtTokenRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def is_token_blacklisted(self, jti: UUID) -> bool:
+    async def is_token_in_blacklist(self, jti: UUID) -> bool:
         raise NotImplementedError
