@@ -1,6 +1,3 @@
-class InvalidTokenType(Exception):
-    pass
-
-
-class TokenValidationError(Exception):
-    pass
+class WrongTokenType(Exception):
+    def __init__(self) -> None:
+        self.message = f"Put wrong token type"

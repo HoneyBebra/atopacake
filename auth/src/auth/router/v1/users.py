@@ -97,7 +97,7 @@ async def login_user(
         }
     },
 )
-@CheckJWT(credentials_type="all")
+@CheckJWT()
 async def get_user(
     credentials: JwtAuthorizationCredentials = Security(settings.access_security),
 ) -> UserJwtSchema:
@@ -119,13 +119,13 @@ async def get_user(
         }
     },
 )
+@CheckJWT()
 async def refresh_access_token(
     user_service: UsersService = Depends(),
-    refresh_credentials: JwtAuthorizationCredentials = Security(refresh_security),
+    credentials: JwtAuthorizationCredentials = Security(settings.refresh_security),
 ) -> Response:
-    user = await user_service.verify(refresh_credentials)
-
-    return await user_service.refresh_token(user, refresh_credentials.jti)
+    response = Response()
+    return await user_service.refresh_token(credentials, response)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

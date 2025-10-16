@@ -41,24 +41,16 @@ class UsersService:
             user: Users,
             response: Response,
     ) -> Response:
-        access_token = create_token(
-            data=UserJwtSchema(
-                sub=user.id,
-                email=user.email,
-                phone_number=user.phone_number,
-                iat=time.time(),
-                exp=timedelta(minutes=settings.refresh_token_expire_days),
-            ),
+        access_token = await create_token(
+            sub=user.id,
+            email=user.email,
+            phone_number=user.phone_number,
             token_type="access",
         )
-        refresh_token = create_token(
-            data=UserJwtSchema(
-                sub=user.id,
-                email=user.email,
-                phone_number=user.phone_number,
-                iat=time.time(),
-                exp=timedelta(days=settings.refresh_token_expire_days),
-            ),
+        refresh_token = await create_token(
+            sub=user.id,
+            email=user.email,
+            phone_number=user.phone_number,
             token_type="refresh",
         )
 
@@ -91,3 +83,26 @@ class UsersService:
             raise InvalidCredentials
 
         return users[0]
+
+    async def refresh_token(
+            self,
+            credentials: JwtAuthorizationCredentials,
+            response: Response,
+    ) -> Response:
+        user_jwt_schema = UserJwtSchema(**credentials.subject)
+
+        await self.jwt_token_repository.set_token_to_blacklist(
+            user_id=str(user_jwt_schema.id),
+            jti=credentials.jti,
+            expires_in=timedelta(days=settings.refresh_token_expire_days),
+        )
+
+        access_token = await create_token(
+            sub=user_jwt_schema.id,
+            email=user_jwt_schema.email,
+            phone_number=user_jwt_schema.phone_number,
+            token_type="access",
+        )
+
+        settings.access_security.set_access_cookie(response, access_token)
+        return response
