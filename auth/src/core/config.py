@@ -43,8 +43,7 @@ class Settings(BaseSettings):
 
     redis_host: str
     redis_port: str
-    redis_refresh_tokens_db: int
-    redis_blacklist_tokens_db: int
+    redis_db: int
 
     @property
     def postgres_dsn(self) -> str:
