@@ -13,12 +13,12 @@ app = FastAPI(
     title=settings.app_name,
     description=settings.app_description,
     version=settings.app_version,
-    docs_url=f"{settings.api_prefix}/openapi",
-    openapi_url=f"{settings.api_prefix}/openapi.json",
+    docs_url=f"{settings.api_v1_prefix}/openapi",
+    openapi_url=f"{settings.api_v1_prefix}/openapi.json",
     default_response_class=ORJSONResponse
 )
 
-router = APIRouter(prefix=settings.api_prefix)
+router = APIRouter(prefix=settings.api_v1_prefix)
 
 # router.include_router(<router_name>)
 

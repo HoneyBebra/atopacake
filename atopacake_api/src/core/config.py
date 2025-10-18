@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     postgres_port: str
     postgres_echo: bool
 
-    api_prefix: str
+    api_v1_prefix: str = "/api/v1"
 
     app_name: str
     app_description: str
