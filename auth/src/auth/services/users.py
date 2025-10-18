@@ -1,9 +1,7 @@
-import time
 from datetime import timedelta
 from typing import Any
 
 from fastapi import Depends, Response
-from fastapi_jwt import JwtAuthorizationCredentials
 
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
 from src.auth.models.users import Users
@@ -36,8 +34,54 @@ class UsersService:
         user = await self.users_repository.create(**dict(user_data))
         return user
 
+    async def authenticate(self, user_data: UserLoginSchema) -> Users:
+        if user_data.email is not None:
+            users = await self.users_repository.read(email=user_data.email)
+        elif user_data.phone_number is not None:
+            users = await self.users_repository.read(phone_number=user_data.phone_number)
+        else:
+            raise InvalidCredentials("email or phone number is required")
+
+        if not users or not verify_password(user_data.password, users[0].password):
+            raise InvalidCredentials
+
+        return users[0]
+
+    async def __get_already_used_field(self, **params_to_search: Any) -> Any:
+        for field, value in params_to_search.items():
+            if await self.users_repository.read(**{field: value}):
+                return field
+        return None
+
+    async def add_token_to_blacklist(self, token: str) -> None:
+        await self.jwt_token_repository.set_token_to_blacklist(
+            token=token,
+            expires_in=settings.refresh_token_expire,
+        )
+
+    @staticmethod
+    async def refresh_token(
+            refresh_payload: dict[str, Any],
+            response: Response,
+    ) -> Response:
+        user_jwt_schema = UserJwtSchema(**refresh_payload)
+
+        access_token = await create_token(
+            sub=user_jwt_schema.id,
+            email=user_jwt_schema.email,
+            phone_number=user_jwt_schema.phone_number,
+            token_type="access",
+        )
+
+        settings.access_security.set_access_cookie(
+            response=response,
+            access_token=access_token,
+            expires_delta=timedelta(seconds=settings.access_token_expire),
+        )
+        return response
+
+    @staticmethod
     async def login(
-            self,
             user: Users,
             response: Response,
     ) -> Response:
@@ -54,55 +98,15 @@ class UsersService:
             token_type="refresh",
         )
 
-        await self.jwt_token_repository.set_refresh_token(
-            token=refresh_token,
-            user_id=str(user.id),
-            expires_in=timedelta(days=settings.refresh_token_expire_days)
+        response.set_cookie(
+            key=settings.access_token_key_in_cookie,
+            value=access_token,
+            httponly=True,
+        )
+        response.set_cookie(
+            key=settings.refresh_token_key_in_cookie,
+            value=refresh_token,
+            httponly=True,
         )
 
-        settings.access_security.set_access_cookie(response, access_token)
-        settings.refresh_security.set_refresh_cookie(response, refresh_token)
-
-        return response
-
-    async def __get_already_used_field(self, **params_to_search: Any) -> Any:
-        for field, value in params_to_search.items():
-            if await self.users_repository.read(**{field: value}):
-                return field
-        return None
-
-    async def authenticate(self, user_data: UserLoginSchema) -> Users:
-        if user_data.email is not None:
-            users = await self.users_repository.read(email=user_data.email)
-        elif user_data.phone_number is not None:
-            users = await self.users_repository.read(phone_number=user_data.phone_number)
-        else:
-            raise InvalidCredentials("email or phone number is required")
-
-        if not users or not verify_password(user_data.password, users[0].password):
-            raise InvalidCredentials
-
-        return users[0]
-
-    async def refresh_token(
-            self,
-            credentials: JwtAuthorizationCredentials,
-            response: Response,
-    ) -> Response:
-        user_jwt_schema = UserJwtSchema(**credentials.subject)
-
-        await self.jwt_token_repository.set_token_to_blacklist(
-            user_id=str(user_jwt_schema.id),
-            jti=credentials.jti,
-            expires_in=timedelta(days=settings.refresh_token_expire_days),
-        )
-
-        access_token = await create_token(
-            sub=user_jwt_schema.id,
-            email=user_jwt_schema.email,
-            phone_number=user_jwt_schema.phone_number,
-            token_type="access",
-        )
-
-        settings.access_security.set_access_cookie(response, access_token)
         return response

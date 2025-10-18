@@ -1,14 +1,16 @@
-# TODO: make hybrid crypto system with RSA and AES
-
-from fastapi import APIRouter, Depends, HTTPException, Response, Security, status
-from fastapi_jwt import JwtAuthorizationCredentials
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from jose import jwt
 
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
-
-from src.auth.schemas.v1.users import UserJwtSchema, UserLoginSchema, UserRegisterSchema
+from src.auth.schemas.v1.users import (
+    ResponseUserData,
+    UserJwtSchema,
+    UserLoginSchema,
+    UserRegisterSchema,
+)
 from src.auth.services.users import UsersService
-from src.core.config import settings
 from src.auth.utils.handlers_decorators import CheckJWT
+from src.core.config import settings
 
 router = APIRouter(prefix="/users")
 
@@ -39,6 +41,7 @@ async def signup_user(
     try:
         response = Response()
 
+        # TODO: rollback all if an error
         user = await user_service.create(user_data)
         response = await user_service.login(user, response)
         return response
@@ -88,7 +91,7 @@ async def login_user(
     summary="Read user data from DB",
     responses={
         status.HTTP_200_OK: {
-            "model": UserJwtSchema,
+            "model": ResponseUserData,
             "description": "User data received"
         },
         status.HTTP_403_FORBIDDEN: {
@@ -97,16 +100,30 @@ async def login_user(
         }
     },
 )
-@CheckJWT()
+@CheckJWT("access")
 async def get_user(
-    credentials: JwtAuthorizationCredentials = Security(settings.access_security),
-) -> UserJwtSchema:
-    return UserJwtSchema(**credentials.subject)
+    access_credentials: str | None = Cookie(
+        default=None,
+        alias=settings.access_token_key_in_cookie,
+    ),
+) -> ResponseUserData:
+    # TODO: Convert decorator to DI to avoid duplicating payload calculations
+    payload = jwt.decode(
+        token=access_credentials,
+        key=settings.jwt_secret_key,
+        algorithms=settings.jwt_algorithm,
+    )
+
+    return {
+        "id": payload.get("sub"),
+        "email": payload.get("email"),
+        "phone_number": payload.get("phone_number"),
+    }
 
 
 @router.post(
     "/refresh",
-    description="Refresh tokens",
+    description="Refresh access token",
     summary="Get new access token and replace refresh one",
     responses={
         status.HTTP_200_OK: {
@@ -119,21 +136,53 @@ async def get_user(
         }
     },
 )
-@CheckJWT()
+@CheckJWT("refresh")
 async def refresh_access_token(
     user_service: UsersService = Depends(),
-    credentials: JwtAuthorizationCredentials = Security(settings.refresh_security),
+    refresh_credentials: str | None = Cookie(
+        default=None,
+        alias=settings.refresh_token_key_in_cookie,
+    ),
 ) -> Response:
     response = Response()
-    return await user_service.refresh_token(credentials, response)
+
+    # TODO: Convert decorator to DI to avoid duplicating payload calculations
+    payload = jwt.decode(
+        token=refresh_credentials,
+        key=settings.jwt_secret_key,
+        algorithms=settings.jwt_algorithm,
+    )
+
+    await user_service.add_token_to_blacklist(refresh_credentials)
+    return await user_service.refresh_token(payload, response)
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def invalidate_user(
-    user_service: UserService = Depends(),
-    refresh_credentials: JwtAuthorizationCredentials = Security(refresh_security),
-    access_credentials: JwtAuthorizationCredentials = Security(access_security),
+@router.post(
+    "/logout",
+    description="Logout user",
+    summary="Logout user -> Add tokens to blacklist",
+    responses={
+        status.HTTP_200_OK: {
+            "model": None,
+            "description": "User invalidated"
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": None,
+            "description": "No rights",
+        }
+    },
+)
+@CheckJWT("all")
+async def logout_user(
+    user_service: UsersService = Depends(),
+    refresh_credentials: str | None = Cookie(
+        default=None,
+        alias=settings.refresh_token_key_in_cookie,
+    ),
+    access_credentials: str | None = Cookie(
+        default=None,
+        alias=settings.access_token_key_in_cookie,
+    ),
 ) -> None:
-    user = await user_service.verify(refresh_credentials)
-
-    await user_service.logout(user.id, refresh_credentials.jti, access_credentials.jti)
+    await user_service.add_token_to_blacklist(access_credentials)
+    await user_service.add_token_to_blacklist(refresh_credentials)
