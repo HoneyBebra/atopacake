@@ -1,31 +1,32 @@
 import time
-from datetime import timedelta
 from typing import Literal
+from uuid import UUID
 
 # TODO: jose is deprecated
 from jose import jwt
 
-from src.core.config import settings
 from src.auth.exceptions.jwt import WrongTokenType
+from src.core.config import settings
 
 
 async def create_token(
-        sub: str,
+        sub: UUID,
         email: str,
         phone_number: str,
         token_type: Literal["access", "refresh"],
 ) -> str:
+    iat = time.time()
     raw_data = {
-        "sub": sub,
+        "sub": str(sub),
         "email": email,
         "phone_number": phone_number,
-        "iat": time.time(),
+        "iat": iat,
     }
 
     if token_type == "access":
-        raw_data["exp"] = timedelta(minutes=settings.access_token_expire_minutes)
+        raw_data["exp"] = iat + settings.access_token_expire
     elif token_type == "refresh":
-        raw_data["exp"] = timedelta(days=settings.refresh_token_expire_days)
+        raw_data["exp"] = iat + settings.refresh_token_expire
     else:
         raise WrongTokenType
 

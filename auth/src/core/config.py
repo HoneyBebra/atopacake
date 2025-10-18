@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from fastapi_jwt import JwtAccessCookie, JwtRefreshCookie
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from redis.asyncio.retry import Retry
 from redis.backoff import ExponentialBackoff
@@ -39,6 +38,12 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    access_token_key_in_cookie: str = "access_token"
+    refresh_token_key_in_cookie: str = "refresh_token"
+
+    access_token_expire: int = access_token_expire_minutes * 60
+    refresh_token_expire: int = refresh_token_expire_days * 24 * 60 * 60
+
     password_min_length: int = 8
 
     redis_host: str
@@ -55,14 +60,6 @@ class Settings(BaseSettings):
             f"{self.postgres_port}/"
             f"{self.postgres_db}"
         )
-
-    @property
-    def access_security(self) -> JwtAccessCookie:
-        return JwtAccessCookie(secret_key=self.jwt_secret_key, auto_error=False)
-
-    @property
-    def refresh_security(self) -> JwtRefreshCookie:
-        return JwtRefreshCookie(secret_key=self.jwt_secret_key, auto_error=False)
 
     @property
     def redis_settings(self) -> dict[str, Any]:
