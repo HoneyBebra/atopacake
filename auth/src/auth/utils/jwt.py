@@ -2,7 +2,6 @@ import time
 from typing import Literal
 from uuid import UUID
 
-# TODO: jose is deprecated
 from jose import jwt
 
 from src.auth.exceptions.jwt import WrongTokenType
@@ -32,5 +31,9 @@ async def create_token(
 
     to_encode = raw_data.copy()
     to_encode.update({"type": token_type})
-    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        claims=to_encode,
+        key=settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm,
+    )
     return encoded_jwt

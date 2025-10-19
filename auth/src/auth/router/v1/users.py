@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
-from jose import jwt
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from src.auth.dependencies.jwt import get_access_token_data, get_refresh_token_data
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
 from src.auth.schemas.v1.users import (
     ResponseUserData,
@@ -9,7 +9,6 @@ from src.auth.schemas.v1.users import (
     UserRegisterSchema,
 )
 from src.auth.services.users import UsersService
-from src.auth.utils.handlers_decorators import CheckJWT
 from src.core.config import settings
 
 router = APIRouter(prefix="/users")
@@ -31,7 +30,6 @@ router = APIRouter(prefix="/users")
             "model": None,
             "description": "User already created",
         },
-        # TODO: Check if ValueError
     },
 )
 async def signup_user(
@@ -41,9 +39,13 @@ async def signup_user(
     try:
         response = Response()
 
-        # TODO: rollback all if an error
         user = await user_service.create(user_data)
-        response = await user_service.login(user, response)
+        response = await user_service.login(
+            user_id=user.id,
+            email=user.email,
+            phone_number=user.phone_number,
+            response=response,
+        )
         return response
     except UserAlreadyExists as e:
         raise HTTPException(
@@ -65,24 +67,26 @@ async def signup_user(
             "model": None,
             "description": "User didn't login"
         },
-        # TODO: Check if ValueError
     },
 )
 async def login_user(
     login_data: UserLoginSchema,
     user_service: UsersService = Depends()
 ) -> Response:
-    response = Response()
     try:
+        response = Response()
         user = await user_service.authenticate(login_data)
-        response = await user_service.login(user, response)
+        return await user_service.login(
+            user_id=user.id,
+            email=user.email,
+            phone_number=user.phone_number,
+            response=response,
+        )
     except InvalidCredentials as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=e.message,
         ) from e
-
-    return response
 
 
 @router.get(
@@ -100,24 +104,15 @@ async def login_user(
         }
     },
 )
-@CheckJWT("access")
 async def get_user(
-    access_credentials: str | None = Cookie(
-        default=None,
-        alias=settings.access_token_key_in_cookie,
-    ),
+    access_token_data: tuple[UserJwtSchema, str] = Depends(get_access_token_data),
 ) -> ResponseUserData:
-    # TODO: Convert decorator to DI to avoid duplicating payload calculations
-    payload = jwt.decode(
-        token=access_credentials,
-        key=settings.jwt_secret_key,
-        algorithms=settings.jwt_algorithm,
-    )
+    jwt_data, _ = access_token_data
 
     return {
-        "id": payload.get("sub"),
-        "email": payload.get("email"),
-        "phone_number": payload.get("phone_number"),
+        "id": jwt_data.sub,
+        "email": jwt_data.email,
+        "phone_number": jwt_data.phone_number,
     }
 
 
@@ -127,7 +122,7 @@ async def get_user(
     summary="Get new access token and replace refresh one",
     responses={
         status.HTTP_200_OK: {
-            "model": UserJwtSchema,
+            "model": None,
             "description": "User data received"
         },
         status.HTTP_403_FORBIDDEN: {
@@ -136,25 +131,21 @@ async def get_user(
         }
     },
 )
-@CheckJWT("refresh")
-async def refresh_access_token(
+async def refresh_tokens(
     user_service: UsersService = Depends(),
-    refresh_credentials: str | None = Cookie(
-        default=None,
-        alias=settings.refresh_token_key_in_cookie,
-    ),
+    refresh_token_data: tuple[UserJwtSchema, str] = Depends(get_refresh_token_data),
 ) -> Response:
     response = Response()
 
-    # TODO: Convert decorator to DI to avoid duplicating payload calculations
-    payload = jwt.decode(
-        token=refresh_credentials,
-        key=settings.jwt_secret_key,
-        algorithms=settings.jwt_algorithm,
-    )
+    jwt_data, raw_token = refresh_token_data
 
-    await user_service.add_token_to_blacklist(refresh_credentials)
-    return await user_service.refresh_token(payload, response)
+    await user_service.add_token_to_blacklist(raw_token, settings.refresh_token_expire)
+    return await user_service.login(
+        user_id=jwt_data.sub,
+        email=jwt_data.email,
+        phone_number=jwt_data.phone_number,
+        response=response,
+    )
 
 
 @router.post(
@@ -172,17 +163,13 @@ async def refresh_access_token(
         }
     },
 )
-@CheckJWT("all")
 async def logout_user(
     user_service: UsersService = Depends(),
-    refresh_credentials: str | None = Cookie(
-        default=None,
-        alias=settings.refresh_token_key_in_cookie,
-    ),
-    access_credentials: str | None = Cookie(
-        default=None,
-        alias=settings.access_token_key_in_cookie,
-    ),
+    refresh_token_data: tuple[UserJwtSchema, str] = Depends(get_refresh_token_data),
+    access_token_data: tuple[UserJwtSchema, str] = Depends(get_access_token_data),
 ) -> None:
-    await user_service.add_token_to_blacklist(access_credentials)
-    await user_service.add_token_to_blacklist(refresh_credentials)
+
+    _, access_raw_token = access_token_data
+    _, refresh_raw_token = refresh_token_data
+    await user_service.add_token_to_blacklist(access_raw_token, settings.access_token_expire)
+    await user_service.add_token_to_blacklist(refresh_raw_token, settings.refresh_token_expire)

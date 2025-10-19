@@ -37,9 +37,9 @@ class UserLoginSchema(UserEntersDataBaseSchema):
 
 
 class UserJwtSchema(UserDataBase):
-    sub: UUID
-    iat: int
-    exp: int
+    sub: str
+    iat: float
+    exp: float
     type: str
 
 

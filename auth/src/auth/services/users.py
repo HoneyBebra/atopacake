@@ -1,11 +1,10 @@
-from datetime import timedelta
 from typing import Any
 
 from fastapi import Depends, Response
 
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
 from src.auth.models.users import Users
-from src.auth.schemas.v1.users import UserJwtSchema, UserLoginSchema, UserRegisterSchema
+from src.auth.schemas.v1.users import UserLoginSchema, UserRegisterSchema
 from src.auth.services.repositories.jwt_token import JwtTokenRepository
 from src.auth.services.repositories.users import UsersRepository
 from src.auth.utils.encryption import verify_password
@@ -53,48 +52,33 @@ class UsersService:
                 return field
         return None
 
-    async def add_token_to_blacklist(self, token: str) -> None:
+    async def add_token_to_blacklist(
+            self,
+            token: str,
+            expires_in: int,
+    ) -> None:
         await self.jwt_token_repository.set_token_to_blacklist(
             token=token,
-            expires_in=settings.refresh_token_expire,
+            expires_in=expires_in,
         )
-
-    @staticmethod
-    async def refresh_token(
-            refresh_payload: dict[str, Any],
-            response: Response,
-    ) -> Response:
-        user_jwt_schema = UserJwtSchema(**refresh_payload)
-
-        access_token = await create_token(
-            sub=user_jwt_schema.id,
-            email=user_jwt_schema.email,
-            phone_number=user_jwt_schema.phone_number,
-            token_type="access",
-        )
-
-        settings.access_security.set_access_cookie(
-            response=response,
-            access_token=access_token,
-            expires_delta=timedelta(seconds=settings.access_token_expire),
-        )
-        return response
 
     @staticmethod
     async def login(
-            user: Users,
+            user_id: str,
+            email: str,
+            phone_number: str,
             response: Response,
     ) -> Response:
         access_token = await create_token(
-            sub=user.id,
-            email=user.email,
-            phone_number=user.phone_number,
+            sub=user_id,
+            email=email,
+            phone_number=phone_number,
             token_type="access",
         )
         refresh_token = await create_token(
-            sub=user.id,
-            email=user.email,
-            phone_number=user.phone_number,
+            sub=user_id,
+            email=email,
+            phone_number=phone_number,
             token_type="refresh",
         )
 
