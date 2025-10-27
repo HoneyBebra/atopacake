@@ -10,15 +10,11 @@ from src.core.config import settings
 
 async def create_token(
         sub: UUID,
-        email: str,
-        phone_number: str,
         token_type: Literal["access", "refresh"],
 ) -> str:
     iat = time.time()
     raw_data = {
         "sub": str(sub),
-        "email": email,
-        "phone_number": phone_number,
         "iat": iat,
     }
 

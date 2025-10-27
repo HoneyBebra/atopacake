@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     redis_port: str
     redis_db: int
 
+    encryption_user_data_secret_key: str
+
     @property
     def postgres_dsn(self) -> str:
         return (

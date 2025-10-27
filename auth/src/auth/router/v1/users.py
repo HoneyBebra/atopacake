@@ -40,10 +40,8 @@ async def signup_user(
         response = Response()
 
         user = await user_service.create(user_data)
-        response = await user_service.login(
+        response = await user_service.add_tokens_to_response(
             user_id=user.id,
-            email=user.email,
-            phone_number=user.phone_number,
             response=response,
         )
         return response
@@ -76,10 +74,8 @@ async def login_user(
     try:
         response = Response()
         user = await user_service.authenticate(login_data)
-        return await user_service.login(
+        return await user_service.add_tokens_to_response(
             user_id=user.id,
-            email=user.email,
-            phone_number=user.phone_number,
             response=response,
         )
     except InvalidCredentials as e:
@@ -109,11 +105,7 @@ async def get_user(
 ) -> ResponseUserData:
     jwt_data, _ = access_token_data
 
-    return {
-        "id": jwt_data.sub,
-        "email": jwt_data.email,
-        "phone_number": jwt_data.phone_number,
-    }
+    return {"id": jwt_data.sub}
 
 
 @router.post(
@@ -140,10 +132,8 @@ async def refresh_tokens(
     jwt_data, raw_token = refresh_token_data
 
     await user_service.add_token_to_blacklist(raw_token, settings.refresh_token_expire)
-    return await user_service.login(
+    return await user_service.add_tokens_to_response(
         user_id=jwt_data.sub,
-        email=jwt_data.email,
-        phone_number=jwt_data.phone_number,
         response=response,
     )
 

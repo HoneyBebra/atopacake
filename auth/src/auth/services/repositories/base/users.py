@@ -11,9 +11,11 @@ class BaseUsersRepository(ABC):
     async def create(
             self,
             login: str,
-            password: str,
-            phone_number: str | None = None,
-            email: str | None = None,
+            password_hash: str,
+            encrypted_email: str | None = None,
+            encrypted_phone_number: str | None = None,
+            email_hash: str | None = None,
+            phone_number_hash: str | None = None,
     ) -> Users:
         raise NotImplementedError
 

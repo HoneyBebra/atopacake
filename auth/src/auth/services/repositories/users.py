@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models.users import Users
 from src.auth.services.repositories.base.users import BaseUsersRepository
-from src.auth.utils.encryption import hash_password
 from src.db.postgres import get_session
 
 
@@ -17,16 +16,20 @@ class UsersRepository(BaseUsersRepository):
     async def create(
             self,
             login: str,
-            password: str,
-            phone_number: str | None = None,
-            email: str | None = None,
+            password_hash: str,
+            encrypted_email: str | None = None,
+            encrypted_phone_number: str | None = None,
+            email_hash: str | None = None,
+            phone_number_hash: str | None = None,
     ) -> Users:
         user = Users()
 
         user.login = login
-        user.password = hash_password(password)
-        user.email = email
-        user.phone_number = phone_number
+        user.password = password_hash
+        user.encrypted_email = encrypted_email
+        user.encrypted_phone_number = encrypted_phone_number
+        user.email_hash = email_hash
+        user.phone_number_hash = phone_number_hash
 
         self.session.add(user)
         await self.session.commit()
@@ -37,8 +40,8 @@ class UsersRepository(BaseUsersRepository):
     async def read(
             self,
             login: str | None = None,
-            phone_number: str | None = None,
-            email: str | None = None,
+            phone_number_hash: str | None = None,
+            email_hash: str | None = None,
             limit: int | None = None,
             offset: int | None = None,
             order_by: str | None = None,
@@ -47,10 +50,10 @@ class UsersRepository(BaseUsersRepository):
 
         if login is not None:
             query = query.where(Users.login == login)
-        if phone_number is not None:
-            query = query.where(Users.phone_number == phone_number)
-        if email is not None:
-            query = query.where(Users.email == email)
+        if phone_number_hash is not None:
+            query = query.where(Users.phone_number_hash == phone_number_hash)
+        if email_hash is not None:
+            query = query.where(Users.email_hash == email_hash)
         if order_by is not None:
             query = query.order_by(order_by)
         if limit is not None:
