@@ -7,8 +7,8 @@ from src.auth.schemas.v1.base import validate_password
 
 
 class UserDataBase(BaseModel):
-    email: EmailStr | None
-    phone_number: str | None = Field(pattern=r"^\+?1?\d{9,15}$")
+    email: EmailStr | None = Field(default=None)
+    phone_number: str | None = Field(pattern=r"^\+?1?\d{9,15}$", default=None)
 
 
 class UserEntersDataBaseSchema(UserDataBase):
@@ -16,7 +16,7 @@ class UserEntersDataBaseSchema(UserDataBase):
 
     @model_validator(mode="before")
     def check_email_or_phone_number_exists(self) -> "UserEntersDataBaseSchema":
-        if not self.get("email") and self.get("phone_number") is not None:
+        if not self.get("email") and not self.get("phone_number"):
             raise ValueError("email or phone number is required")
         return self
 

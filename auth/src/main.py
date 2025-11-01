@@ -23,8 +23,6 @@ app.include_router(router)
 
 if __name__ == "__main__":
 
-    # TODO: Migrate DB
-    # TODO: Test after encoding user data changes
     # TODO: Add backoff to DB requests
 
     uvicorn.run(

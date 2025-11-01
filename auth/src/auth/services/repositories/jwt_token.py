@@ -13,13 +13,11 @@ class JwtTokenRepository(BaseJwtTokenRepository):
         self.redis_session = redis_session
 
     async def set_token_to_blacklist(self, token: str, expires_in: int) -> None:
-        async with self.redis_session as session:
-            await session.setex(
-                name=token,
-                time=expires_in,
-                value="none",
-            )
+        await self.redis_session.setex(
+            name=token,
+            time=expires_in,
+            value="none",
+        )
 
     async def is_token_in_blacklist(self, token: str) -> bool:
-        async with self.redis_session as session:
-            return bool(await session.exists(token))
+        return bool(await self.redis_session.exists(token))

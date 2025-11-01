@@ -70,6 +70,7 @@ class Settings(BaseSettings):
         return {
             "host": self.redis_host,
             "port": self.redis_port,
+            "db": self.redis_db,
             "socket_keepalive": True,
             "retry": Retry(ExponentialBackoff(), 3),
             "retry_on_error": [TimeoutError, ConnectionError],

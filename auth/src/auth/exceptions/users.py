@@ -9,13 +9,3 @@ class InvalidCredentials(Exception):
             self.message = "Invalid credentials"
         else:
             self.message = f"Invalid credentials: {message}"
-
-
-class NoCredentialsData(Exception):
-    def __init__(self) -> None:
-        self.message = "No credentials data"
-
-
-class TokenInBlackList(Exception):
-    def __init__(self) -> None:
-        self.message = "Token in black list"

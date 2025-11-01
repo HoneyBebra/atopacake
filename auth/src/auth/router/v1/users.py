@@ -30,6 +30,9 @@ router = APIRouter(prefix="/users")
             "model": None,
             "description": "User already created",
         },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "Wrong data was passed",
+        }
     },
 )
 async def signup_user(
@@ -65,6 +68,9 @@ async def signup_user(
             "model": None,
             "description": "User didn't login"
         },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "description": "Wrong data was passed",
+        }
     },
 )
 async def login_user(

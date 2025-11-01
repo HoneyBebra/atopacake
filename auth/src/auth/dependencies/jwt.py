@@ -12,15 +12,27 @@ from src.core.config import settings
 async def get_access_token_data(
     access_token: str | None = Cookie(default=None, alias=settings.access_token_key_in_cookie),
     user_service: UsersService = Depends(),
-) -> tuple[dict[str, Any], str]:
-    return await __get_token_data(access_token, user_service)
+) -> tuple[UserJwtSchema, str]:
+    jwt_schema, token = await __get_token_data(access_token, user_service)
+    if jwt_schema.type != "access":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid credentials",
+        )
+    return jwt_schema, token
 
 
 async def get_refresh_token_data(
     refresh_token: str | None = Cookie(default=None, alias=settings.refresh_token_key_in_cookie),
     user_service: UsersService = Depends(),
-) -> tuple[dict[str, Any], str]:
-    return await __get_token_data(refresh_token, user_service)
+) -> tuple[UserJwtSchema, str]:
+    jwt_schema, token = await __get_token_data(refresh_token, user_service)
+    if jwt_schema.type != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid credentials",
+        )
+    return jwt_schema, token
 
 
 async def __get_token_data(

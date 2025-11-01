@@ -1,6 +1,7 @@
 import hashlib
-from passlib.context import CryptContext
+
 from cryptography.fernet import Fernet
+from passlib.context import CryptContext
 
 from src.core.config import settings
 
@@ -19,17 +20,16 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def hash_user_data(data: str) -> str:
     return hashlib.sha256(
-        f"{data}{settings.encryption_user_data_secret_key}".encode("utf-8"),
+        f"{data}{settings.encryption_user_data_secret_key}".encode(),
     ).hexdigest()
 
 
 def verify_user_data(data: str, hashed_data: str) -> bool:
-    return hashlib.sha256(
-        f"{data}{settings.encryption_user_data_secret_key}".encode("utf-8"),
-    ).hexdigest() == hashed_data
+    return hash_user_data(data) == hashed_data
 
 
 def encrypt_data(data: str) -> str:
+    # TODO: Process exceptions
     return fernet.encrypt(data.encode()).decode()
 
 

@@ -7,7 +7,7 @@ from src.auth.models.users import Users
 from src.auth.schemas.v1.users import UserLoginSchema, UserRegisterSchema
 from src.auth.services.repositories.jwt_token import JwtTokenRepository
 from src.auth.services.repositories.users import UsersRepository
-from src.auth.utils.encryption import verify_password, hash_user_data, hash_password, encrypt_data
+from src.auth.utils.encryption import encrypt_data, hash_password, hash_user_data, verify_password
 from src.auth.utils.jwt import create_token
 from src.core.config import settings
 
@@ -22,38 +22,38 @@ class UsersService:
         self.jwt_token_repository = jwt_token_repository
 
     async def create(self, user_data: UserRegisterSchema) -> Users:
-        email_hash = hash_user_data(user_data.email)
-        phone_number_hash = hash_user_data(user_data.phone_number)
-        password_hash = hash_password(password=user_data.password)
-        encrypted_email = encrypt_data(user_data.email)
-        encrypt_phone_number = encrypt_data(user_data.phone_number)
-
-        already_used_field = await self.__get_already_used_field(
-            email_hash=email_hash,
-            phone_number_hash=phone_number_hash,
+        email_hash, encrypted_email = await self.__get_personal_or_raise_if_exists(
+            raw_data=user_data.email,
+            field_name_for_check_existing_in_db="email_hash",
         )
-        if already_used_field is not None:
-            raise UserAlreadyExists(already_used_field)
+        phone_number_hash, encrypted_phone_number = await self.__get_personal_or_raise_if_exists(
+            raw_data=user_data.phone_number,
+            field_name_for_check_existing_in_db="phone_number_hash",
+        )
+
+        password_hash = hash_password(password=user_data.password)
 
         user = await self.users_repository.create(
             login=user_data.login,
             password_hash=password_hash,
             encrypted_email=encrypted_email,
-            encrypted_phone_number=encrypt_phone_number,
+            encrypted_phone_number=encrypted_phone_number,
             email_hash=email_hash,
             phone_number_hash=phone_number_hash,
         )
         return user
 
     async def authenticate(self, user_data: UserLoginSchema) -> Users:
-        if user_data.email is not None:
-            users = await self.users_repository.read(email_hash=hash_user_data(user_data.email))
-        elif user_data.phone_number is not None:
-            users = await self.users_repository.read(
-                phone_number_hash=hash_user_data(user_data.phone_number),
-            )
-        else:
+        if user_data.email is None and user_data.phone_number is None:
             raise InvalidCredentials("email or phone number is required")
+
+        fields_for_db_query: dict[str, str | None] = {}
+        if user_data.email is not None:
+            fields_for_db_query["email_hash"] = hash_user_data(user_data.email)
+        if user_data.phone_number is not None:
+            fields_for_db_query["phone_number_hash"] = hash_user_data(user_data.phone_number)
+
+        users = await self.users_repository.read(**fields_for_db_query)
 
         if not users or not verify_password(user_data.password, users[0].password):
             raise InvalidCredentials
@@ -75,6 +75,24 @@ class UsersService:
             token=token,
             expires_in=expires_in,
         )
+
+    async def __get_personal_or_raise_if_exists(
+            self,
+            raw_data: str | None,
+            field_name_for_check_existing_in_db: str,
+    ) -> tuple[str | None, str | None]:
+        if raw_data is not None:
+            data_hash = hash_user_data(raw_data)
+            encrypted_data = encrypt_data(raw_data)
+            already_used_field = await self.__get_already_used_field(
+                **{field_name_for_check_existing_in_db: data_hash},
+            )
+            if already_used_field is not None:
+                raise UserAlreadyExists(already_used_field.replace("_hash", ""))
+
+            return data_hash, encrypted_data
+
+        return None, None
 
     @staticmethod
     async def add_tokens_to_response(

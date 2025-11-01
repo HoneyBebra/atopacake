@@ -23,8 +23,8 @@ class BaseUsersRepository(ABC):
     async def read(
             self,
             login: str | None = None,
-            phone_number: str | None = None,
-            email: str | None = None,
+            phone_number_hash: str | None = None,
+            email_hash: str | None = None,
             limit: int | None = None,
             offset: int | None = None,
             order_by: str | None = None,
