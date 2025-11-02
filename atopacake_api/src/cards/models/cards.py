@@ -1,11 +1,14 @@
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.cards.models.directories import Directories
-from src.common.models import BaseModel
+from src.core.models import BaseModel
 from src.texts.models.texts import Texts
+
+if TYPE_CHECKING:
+    from src.directories.models.directories import Directories
 
 
 class Cards(BaseModel):
@@ -29,7 +32,6 @@ class Cards(BaseModel):
         ForeignKey("texts.id"),
         nullable=True
     )
-    text_offset: Mapped[int] = mapped_column(nullable=True)
 
     directory: Mapped["Directories"] = relationship(
         "Directories",

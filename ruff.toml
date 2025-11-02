@@ -27,6 +27,7 @@ select = [
 ]
 ignore = [
     "B008",  # do not perform function calls in argument defaults
+    "N818",  # Exceptions should be named with an Error suffix
 ]
 
 [lint.isort]

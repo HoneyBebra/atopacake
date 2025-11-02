@@ -20,7 +20,14 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
     postgres_host: str
-    postgres_port: int
+    postgres_port: str
+    postgres_echo: bool
+
+    api_v1_prefix: str = "/api/v1"
+
+    app_name: str
+    app_description: str
+    app_version: str
 
     @property
     def postgres_dsn(self) -> str:

@@ -1,9 +1,36 @@
 # Atopacake
 
-# TODO: make a readme
+# DB scheme
+[API service](atopacake_api/README.md)
+
+[Auth service](auth/README.md)
 
 # Architecture
-![current-architecture](./architecture/current_architecture.png)
-
-# PostgreSQL schema:
-![PostgreSQL-schema](./architecture/postgresql_schema.png)
+```         
+              ┌─NginxGateway─┐      ┌─AtopacakeAPI─────────────────────────────────────────┐
+    user ───→ │              ├───┐  │  ┌─NginxAtopacakeApi─┐                               │
+              └────┬─────────┘   └──┼─→│                   │                               │
+                   │                │  └───────────────┬───┘                               │
+                   │                │                  │                                   │
+                   │                │                  ↓                                   │
+                   │                │  ┌─FastApiApp─────────┐                              │
+                   │                │  │ Cards schema       │       ┌─PostgresAtopacake─┐  │
+                   │                │  │ Texts schema       ├─────→ │                   │  │
+                   │                │  │ Directories schema │       └───────────────────┘  │
+                   │                │  └────────────────────┘                              │
+                   │                │                                                      │  
+                   │                └──────────────────────────────────────────────────────┘
+                   ↓
+    ┌─Auth─────────────────────────────────┐             
+    │ ┌─NginxAuth─┐                        │
+    │ │           │                        │
+    │ └────┬──────┘                        │
+    │      ↓                               │                    
+    │ ┌─FastApiApp───┐    ┌─PostgresAuth─┐ │           
+    │ │ Users schema ├───→│              │ │
+    │ └─────┬────────┘    └──────────────┘ │
+    │       │             ┌─RedisAuth─┐    │
+    │       └────────────→│           │    │
+    │                     └───────────┘    │
+    └──────────────────────────────────────┘                   
+```

@@ -6,3 +6,12 @@ pydantic-settings==2.10.1
 asyncpg==0.30.0
 gunicorn==23.0.0
 uvicorn==0.35.0
+bcrypt==3.2.2
+fastapi==0.116.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+redis[hiredis]==5.0.1
+fastapi-jwt==0.3.0
+email-validator==2.3.0
+orjson==3.11.3
