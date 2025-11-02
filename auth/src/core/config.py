@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     redis_host: str
     redis_port: str
     redis_db: int
+    redis_password: str
 
     encryption_user_data_secret_key: str
 
@@ -65,12 +66,11 @@ class Settings(BaseSettings):
 
     @property
     def redis_settings(self) -> dict[str, Any]:
-        # TODO: Add redis password
-
         return {
             "host": self.redis_host,
             "port": self.redis_port,
             "db": self.redis_db,
+            "password": self.redis_password,
             "socket_keepalive": True,
             "retry": Retry(ExponentialBackoff(), 3),
             "retry_on_error": [TimeoutError, ConnectionError],
