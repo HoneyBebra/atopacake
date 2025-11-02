@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from redis.asyncio.retry import Retry
 from redis.backoff import ExponentialBackoff
 from redis.exceptions import ConnectionError, TimeoutError
+from sqlalchemy.exc import DisconnectionError, OperationalError
+from tenacity import retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from src.core.logger import LOGGING
 
@@ -53,6 +55,17 @@ class Settings(BaseSettings):
 
     encryption_user_data_secret_key: str
 
+    backoff_retries_count: int = 10
+
+    @property
+    def backoff_decorator_sqlalchemy_settings(self) -> dict[str, Any]:
+        return {
+            "stop": stop_after_attempt(self.backoff_retries_count),
+            "wait":  wait_exponential(multiplier=1, min=2, max=60),
+            "retry": retry_if_exception_type((OperationalError, DisconnectionError)),
+            "reraise": True,
+        }
+
     @property
     def postgres_dsn(self) -> str:
         return (
@@ -72,7 +85,7 @@ class Settings(BaseSettings):
             "db": self.redis_db,
             "password": self.redis_password,
             "socket_keepalive": True,
-            "retry": Retry(ExponentialBackoff(), 3),
+            "retry": Retry(ExponentialBackoff(), self.backoff_retries_count),
             "retry_on_error": [TimeoutError, ConnectionError],
         }
 

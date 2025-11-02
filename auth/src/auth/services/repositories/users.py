@@ -3,9 +3,11 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from tenacity import retry
 
 from src.auth.models.users import Users
 from src.auth.services.repositories.base.users import BaseUsersRepository
+from src.core.config import settings
 from src.db.postgres import get_session
 
 
@@ -13,6 +15,7 @@ class UsersRepository(BaseUsersRepository):
     def __init__(self, session: AsyncSession = Depends(get_session)) -> None:
         self.session = session
 
+    @retry(**settings.backoff_decorator_sqlalchemy_settings)
     async def create(
             self,
             login: str,
@@ -37,6 +40,7 @@ class UsersRepository(BaseUsersRepository):
 
         return user
 
+    @retry(**settings.backoff_decorator_sqlalchemy_settings)
     async def read(
             self,
             login: str | None = None,
@@ -64,6 +68,7 @@ class UsersRepository(BaseUsersRepository):
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
+    @retry(**settings.backoff_decorator_sqlalchemy_settings)
     async def update(
             self,
             user_id: UUID,
@@ -74,5 +79,6 @@ class UsersRepository(BaseUsersRepository):
     ) -> Users:
         ...
 
+    @retry(**settings.backoff_decorator_sqlalchemy_settings)
     async def delete(self, user_id: UUID) -> None:
         ...
