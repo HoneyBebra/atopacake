@@ -29,7 +29,6 @@ def verify_user_data(data: str, hashed_data: str) -> bool:
 
 
 def encrypt_data(data: str) -> str:
-    # TODO: Process exceptions
     return fernet.encrypt(data.encode()).decode()
 
 
