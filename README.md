@@ -6,7 +6,9 @@
 [Auth service](auth/README.md)
 
 # Architecture
-```         
+```
+    tg-user ──────┐
+                  ↓
               ┌─NginxGateway─┐      ┌─AtopacakeAPI─────────────────────────────────────────┐
     user ───→ │              ├───┐  │  ┌─NginxAtopacakeApi─┐                               │
               └────┬─────────┘   └──┼─→│                   │                               │
