@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     app_description: str
     app_version: str
 
+    access_token_key_in_cookie: str = "access_token"
+
     @property
     def postgres_dsn(self) -> str:
         return (
