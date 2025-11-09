@@ -1,54 +1,28 @@
-'''
 import grpc
-from google.protobuf import empty_pb2
 
-from src.protos import user_service_pb2, user_service_pb2_grpc
 from src.core.config import settings
+from src.gRPC.protos import user_pb2, user_pb2_grpc
 
 
-class UserServiceClient:
+class GrpcClient:
     def __init__(self):
         self.channel = None
         self.stub = None
 
-    # TODO: make context manager and return as DB object
-    async def connect(self):
-        """Подключаемся к gRPC серверу"""
+    async def __aenter__(self) -> "GrpcClient":
         self.channel = grpc.aio.insecure_channel(settings.grpc_user_service_url)
-        self.stub = user_service_pb2_grpc.UserServiceStub(self.channel)
+        self.stub = user_pb2_grpc.UserStub(self.channel)
+        return self
 
-    async def validate_token(self, token: str) -> dict:
-        """Валидируем токен - аналог POST /auth/validate"""
-        request = user_service_pb2.TokenRequest(token=token)
-        try:
-            response = await self.stub.ValidateToken(request)
-            return {
-                "id": response.id,
-                "username": response.username,
-                "email": response.email,
-                "is_active": response.is_active
-            }
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.UNAUTHENTICATED:
-                return None
-            raise e
-
-    async def get_user_info(self, user_id: str) -> dict:
-        """Получаем информацию о пользователе - аналог GET /users/{user_id}"""
-        request = user_service_pb2.UserRequest(user_id=user_id)
-        response = await self.stub.GetUserInfo(request)
-        return {
-            "id": response.id,
-            "username": response.username,
-            "email": response.email
-        }
-
-    async def close(self):
-        """Закрываем соединение"""
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.channel:
             await self.channel.close()
 
+    async def make_user_info_request(self, access_token: str):  # TODO: Add type hint
+        request = user_pb2.GetUserInfoByTokenRequest(access_token=access_token)
+        return await self.stub.GetUserInfoByToken(request)
 
-# Создаем глобальный экземпляр клиента
-user_client = UserServiceClient()
-'''
+
+async def get_grpc_session() -> GrpcClient:
+    async with GrpcClient() as session:
+        yield session

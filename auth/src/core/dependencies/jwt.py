@@ -4,9 +4,9 @@ from fastapi import Cookie, Depends, HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
 
-from src.auth.schemas.v1.users import UserJwtSchema
 from src.auth.services.users import UsersService
 from src.core.config import settings
+from src.core.schemas import UserJwtSchema
 
 
 async def get_access_token_data(

@@ -1,3 +1,7 @@
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
+import grpc
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
@@ -7,6 +11,20 @@ from src.auth.models.users import Users  # noqa: F401
 from src.auth.router.v1 import router as auth_router
 from src.core.config import settings
 from src.core.logger import LOGGING
+from src.gRPC.protos import user_pb2_grpc
+from src.gRPC.server import GrpcServer
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator:
+
+    server = grpc.aio.server()
+    user_pb2_grpc.add_UserServicer_to_server(GrpcServer(), server)
+    server.add_insecure_port(f"[::]:{settings.grpc_port}")
+
+    async with server:
+        yield
+
 
 app = FastAPI(
     title=settings.app_name,
