@@ -1,7 +1,7 @@
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from src.auth.services.repositories.base.jwt_token import BaseJwtTokenRepository
+from src.core.services.repositories.base.jwt_token import BaseJwtTokenRepository
 from src.db.redis import get_redis_session
 
 

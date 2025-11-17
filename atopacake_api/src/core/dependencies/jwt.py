@@ -4,6 +4,7 @@ from fastapi import Cookie, Depends, HTTPException, status
 from src.core.config import settings
 from src.core.schemas import UserInfoByTokenSchema
 from src.gRPC.client import GrpcClient, get_grpc_session
+from src.gRPC.protos import user_pb2
 
 
 async def get_user_info_by_token(
@@ -12,7 +13,7 @@ async def get_user_info_by_token(
 ) -> UserInfoByTokenSchema:
     await __check_raw_token(access_token)
 
-    response = await __request_for_user_info(access_token, grpc_session)
+    response = await __request_for_user_info(access_token, grpc_session)  # type: ignore[arg-type]
 
     return await __get_user_data_from_response(response)
 
@@ -26,7 +27,10 @@ async def __check_raw_token(token: str | None) -> str:
     return token
 
 
-async def __request_for_user_info(access_token: str, grpc_session: GrpcClient):  # TODO: Add type hint
+async def __request_for_user_info(
+        access_token: str,
+        grpc_session: GrpcClient,
+) -> user_pb2.GetUserInfoByTokenResponse:
     try:
         return await grpc_session.make_user_info_request(access_token=access_token)
     except grpc.RpcError as e:
@@ -38,6 +42,7 @@ async def __request_for_user_info(access_token: str, grpc_session: GrpcClient): 
         raise e
 
 
-# TODO: Add type hint
-async def __get_user_data_from_response(response) -> UserInfoByTokenSchema:
-    print(response)
+async def __get_user_data_from_response(
+        response: user_pb2.GetUserInfoByTokenResponse,
+) -> UserInfoByTokenSchema:
+    return UserInfoByTokenSchema(id=response.id)

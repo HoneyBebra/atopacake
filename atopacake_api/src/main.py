@@ -1,12 +1,15 @@
+# ruff: noqa: I001
+
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
-# Models registration
-from src.cards.models.cards import Cards  # noqa: F401
 from src.cards.router.v1 import router as cards_router
 from src.core.config import settings
 from src.core.logger import LOGGING
+
+# Models registration
+from src.cards.models.cards import Cards  # noqa: F401
 from src.directories.models.directories import Directories  # noqa: F401
 from src.texts.models.texts import Texts  # noqa: F401
 

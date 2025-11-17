@@ -10,4 +10,4 @@ router = APIRouter(prefix="/cards")
 async def test_handler(
         user_data: UserInfoByTokenSchema = Depends(get_user_info_by_token),
 ) -> Response:
-    print(user_data)
+    return user_data
