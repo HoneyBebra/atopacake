@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     app_description: str
     app_version: str
 
+    access_token_key_in_cookie: str = "access_token"
+
+    grpc_user_service_url: str = "auth:50051"
+
     @property
     def postgres_dsn(self) -> str:
         return (

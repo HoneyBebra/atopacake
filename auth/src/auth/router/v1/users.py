@@ -1,15 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from src.auth.dependencies.jwt import get_access_token_data, get_refresh_token_data
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
-from src.auth.schemas.v1.users import (
-    ResponseUserData,
-    UserJwtSchema,
-    UserLoginSchema,
-    UserRegisterSchema,
-)
-from src.auth.services.users import UsersService
+from src.auth.schemas.v1.users import ResponseUserData, UserLoginSchema, UserRegisterSchema
 from src.core.config import settings
+from src.core.dependencies.jwt import get_access_token_data, get_refresh_token_data
+from src.core.schemas import UserJwtSchema
+from src.core.services.users import UsersService
 
 router = APIRouter(prefix="/users")
 

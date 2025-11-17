@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tenacity import retry
 
 from src.auth.models.users import Users
-from src.auth.services.repositories.base.users import BaseUsersRepository
 from src.core.config import settings
+from src.core.services.repositories.base.users import BaseUsersRepository
 from src.db.postgres import get_session
 
 

@@ -36,13 +36,6 @@ class UserLoginSchema(UserEntersDataBaseSchema):
     pass
 
 
-class UserJwtSchema(BaseModel):
-    sub: str
-    iat: float
-    exp: float
-    type: str
-
-
 class ResponseUserData(BaseModel):
     id: UUID
 

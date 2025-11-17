@@ -1,11 +1,15 @@
+# ruff: noqa: I001
+
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
-# Models registration
-from src.cards.models.cards import Cards  # noqa: F401
+from src.cards.router.v1 import router as cards_router
 from src.core.config import settings
 from src.core.logger import LOGGING
+
+# Models registration
+from src.cards.models.cards import Cards  # noqa: F401
 from src.directories.models.directories import Directories  # noqa: F401
 from src.texts.models.texts import Texts  # noqa: F401
 
@@ -19,9 +23,7 @@ app = FastAPI(
 )
 
 router = APIRouter(prefix=settings.api_v1_prefix)
-
-# router.include_router(<router_name>)
-
+router.include_router(cards_router)
 app.include_router(router)
 
 if __name__ == "__main__":

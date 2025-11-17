@@ -57,6 +57,8 @@ class Settings(BaseSettings):
 
     backoff_retries_count: int = 10
 
+    grpc_port: int = 50051
+
     @property
     def backoff_decorator_sqlalchemy_settings(self) -> dict[str, Any]:
         return {

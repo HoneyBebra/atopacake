@@ -7,7 +7,4 @@ from src.core.config import settings
 
 async def get_redis_session() -> AsyncGenerator:
     async with Redis(**settings.redis_settings) as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+        yield session

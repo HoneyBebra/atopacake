@@ -5,11 +5,11 @@ from fastapi import Depends, Response
 from src.auth.exceptions.users import InvalidCredentials, UserAlreadyExists
 from src.auth.models.users import Users
 from src.auth.schemas.v1.users import UserLoginSchema, UserRegisterSchema
-from src.auth.services.repositories.jwt_token import JwtTokenRepository
-from src.auth.services.repositories.users import UsersRepository
 from src.auth.utils.encryption import encrypt_data, hash_password, hash_user_data, verify_password
 from src.auth.utils.jwt import create_token
 from src.core.config import settings
+from src.core.services.repositories.jwt_token import JwtTokenRepository
+from src.core.services.repositories.users import UsersRepository
 
 
 class UsersService:

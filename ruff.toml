@@ -9,6 +9,8 @@ exclude = [
     "env/",
     ".venv/",
     "migration",
+    "user_pb2.py",
+    "user_pb2_grpc.py",
 ]
 
 [lint]
