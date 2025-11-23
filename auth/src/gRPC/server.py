@@ -26,8 +26,9 @@ class GrpcServer(user_pb2_grpc.UserServicer):
                 access_token=request.access_token,
                 user_service=self.user_service,
             )
-        except HTTPException:
+        except HTTPException as e:
             context.set_code(grpc.StatusCode.PERMISSION_DENIED)
+            context.set_details(e.detail)
             return user_pb2.GetUserInfoByTokenResponse()
 
         return user_pb2.GetUserInfoByTokenResponse(id=str(user_data.sub))
