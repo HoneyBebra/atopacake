@@ -37,7 +37,7 @@ async def __request_for_user_info(
         if e.code() == grpc.StatusCode.PERMISSION_DENIED:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=str(e)
+                detail=str(e.details())
             ) from e
         raise e
 
