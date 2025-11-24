@@ -35,7 +35,7 @@ docker-compose up -d --build
         │ side_b           │ string   │             │           │ not null │         │
         │ weight           │ float    │             │           │          │ 0.5     │
         │ random_mix_sides │ boolean  │             │           │          │ false   │
-    ┌──→│ text_id          │          │             │           │          │         │
+    ┌──→│ text_id          │ UUID     │ foreign key │           │          │         │
     │   │ created_at       │ datetime │             │           │ not null │         │
     │   │ updated_at       │ datetime │             │           │ not null │         │
     │   └────────────────────────────────────────────────────────────────────────────┘
