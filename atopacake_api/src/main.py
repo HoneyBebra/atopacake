@@ -5,6 +5,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
 from src.cards.router.v1 import router as cards_router
+from src.directories.router.v1 import router as directories_router
 from src.core.config import settings
 from src.core.logger import LOGGING
 
@@ -24,6 +25,7 @@ app = FastAPI(
 
 router = APIRouter(prefix=settings.api_v1_prefix)
 router.include_router(cards_router)
+router.include_router(directories_router)
 app.include_router(router)
 
 if __name__ == "__main__":

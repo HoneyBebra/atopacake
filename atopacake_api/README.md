@@ -30,12 +30,12 @@ docker-compose up -d --build
    │    │ name             │ type     │ key         │ is unique │ is null  │ default │
    │    │----------------------------------------------------------------------------│
    │    │ id               │ UUID     │ primary key │ unique    │ not null │         │
-   └┬──→│ directory_id     │ UUID     │ foreign key │           │ not null │         │ 
-    │   │ side_a           │ string   │             │           │ not null │         │
-    │   │ side_b           │ string   │             │           │ not null │         │
-    │   │ weight           │ float    │             │           │          │ 0.5     │
-    │   │ random_mix_sides │ boolean  │             │           │          │ false   │
-    │   │ text_id          │          │             │           │          │         │
+   └───→│ directory_id     │ UUID     │ foreign key │           │ not null │         │ 
+        │ side_a           │ string   │             │           │ not null │         │
+        │ side_b           │ string   │             │           │ not null │         │
+        │ weight           │ float    │             │           │          │ 0.5     │
+        │ random_mix_sides │ boolean  │             │           │          │ false   │
+    ┌──→│ text_id          │          │             │           │          │         │
     │   │ created_at       │ datetime │             │           │ not null │         │
     │   │ updated_at       │ datetime │             │           │ not null │         │
     │   └────────────────────────────────────────────────────────────────────────────┘

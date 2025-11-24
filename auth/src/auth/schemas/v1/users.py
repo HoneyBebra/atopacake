@@ -38,4 +38,3 @@ class UserLoginSchema(UserEntersDataBaseSchema):
 
 class ResponseUserData(BaseModel):
     id: UUID
-
