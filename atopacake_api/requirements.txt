@@ -18,3 +18,4 @@ orjson==3.11.3
 googleapis-common-protos==1.71.0
 grpcio==1.76.0
 grpcio-tools==1.76.0
+tenacity==9.1.2

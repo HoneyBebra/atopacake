@@ -12,3 +12,9 @@ class BaseResponseSchema(BaseModel):
 
 class UserInfoByTokenSchema(BaseModel):
     id: UUID
+
+
+class Pagination(BaseModel):
+    page: int
+    count: int
+    total_count: int

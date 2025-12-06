@@ -1,9 +1,12 @@
 from functools import lru_cache
 from logging import config as logging_config
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.exc import DisconnectionError, OperationalError
+from tenacity import retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from src.core.logger import LOGGING
 
@@ -32,6 +35,17 @@ class Settings(BaseSettings):
     access_token_key_in_cookie: str = "access_token"
 
     grpc_user_service_url: str = "auth:50051"
+
+    backoff_retries_count: int = 10
+
+    @property
+    def backoff_decorator_sqlalchemy_settings(self) -> dict[str, Any]:
+        return {
+            "stop": stop_after_attempt(self.backoff_retries_count),
+            "wait": wait_exponential(multiplier=1, min=2, max=60),
+            "retry": retry_if_exception_type((OperationalError, DisconnectionError)),
+            "reraise": True,
+        }
 
     @property
     def postgres_dsn(self) -> str:
