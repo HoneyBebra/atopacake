@@ -2,4 +2,6 @@
 alwaysApply: true
 ---
 
+Stick to a layered architecture and microservices approach.
 
+You can leave docstrings in methods, but don't use #-separated comments.
