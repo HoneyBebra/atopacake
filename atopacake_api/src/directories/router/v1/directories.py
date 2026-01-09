@@ -14,11 +14,12 @@ router = APIRouter(prefix="/directories")
 
 @router.post(
     "",
+    status_code=status.HTTP_201_CREATED,
     description="Create directory",
     summary="Create directory with cards",
     responses={
         status.HTTP_201_CREATED: {
-            "model": None,
+            "model": CreatedDirectorySchema,
             "description": "Directory had been created"
         },
         status.HTTP_403_FORBIDDEN: {
